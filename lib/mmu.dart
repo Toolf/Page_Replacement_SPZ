@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'virtual_page_table.dart';
@@ -9,10 +10,11 @@ import 'physical_memory.dart';
 class MMU {
   late PhysicalMemory physicalMemory;
   final PageReplacementAlgorithm pageReplacementAlgorithm;
-
+  final IOSink? logfile;
   MMU(
     int physicalPageCount,
     this.pageReplacementAlgorithm,
+    this.logfile,
   ) {
     physicalMemory = List.generate(
       physicalPageCount,
@@ -31,6 +33,7 @@ class MMU {
         );
 
         // load physical page to swap file
+        logfile?.writeln("[SWAP] physical page #${physicalPage.pageNumber}");
         physicalPage.virtualPage!.modificationBit = false;
 
         physicalPage.virtualPage!.referenceBit = false;
@@ -52,11 +55,11 @@ class MMU {
     if (virtualPage.presenceBit) {
       return virtualPage.physicalPageNumber as int;
     } else {
-      final phsyicalPageNumber = _getFreePhysicalPageNumber(pid, onPageFault);
-      physicalMemory[phsyicalPageNumber].virtualPage = virtualPage;
-      virtualPage.physicalPageNumber = phsyicalPageNumber;
+      final physicalPageNumber = _getFreePhysicalPageNumber(pid, onPageFault);
+      physicalMemory[physicalPageNumber].virtualPage = virtualPage;
+      virtualPage.physicalPageNumber = physicalPageNumber;
       virtualPage.presenceBit = true;
-      return phsyicalPageNumber;
+      return physicalPageNumber;
     }
   }
 

@@ -43,6 +43,7 @@ class System {
     mmu = MMU(
       physicalPageCount, // кількість фізичних сторінок
       NRU(), // алгоритм заміщення сторінки
+      out,
     );
   }
 
